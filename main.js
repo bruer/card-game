@@ -1,82 +1,17 @@
-const clubs = [
-  { suit: "Clubs", value: "Ace" },
-  { suit: "Clubs", value: "Two" },
-  { suit: "Clubs", value: "Three" },
-  { suit: "Clubs", value: "Four" },
-  { suit: "Clubs", value: "Five" },
-  { suit: "Clubs", value: "Six" },
-  { suit: "Clubs", value: "Seven" },
-  { suit: "Clubs", value: "Eight" },
-  { suit: "Clubs", value: "Nine" },
-  { suit: "Clubs", value: "Ten" },
-  { suit: "Clubs", value: "Jack" },
-  { suit: "Clubs", value: "Queen" },
-  { suit: "Clubs", value: "King" },
-];
-const diamonds = [
-  { suit: "Diamonds", value: "Ace" },
-  { suit: "Diamonds", value: "Two" },
-  { suit: "Diamonds", value: "Three" },
-  { suit: "Diamonds", value: "Four" },
-  { suit: "Diamonds", value: "Five" },
-  { suit: "Diamonds", value: "Six" },
-  { suit: "Diamonds", value: "Seven" },
-  { suit: "Diamonds", value: "Eight" },
-  { suit: "Diamonds", value: "Nine" },
-  { suit: "Diamonds", value: "Ten" },
-  { suit: "Diamonds", value: "Jack" },
-  { suit: "Diamonds", value: "Queen" },
-  { suit: "Diamonds", value: "King" },
-];
-const hearts = [
-  { suit: "Hearts", value: "Ace" },
-  { suit: "Hearts", value: "Two" },
-  { suit: "Hearts", value: "Three" },
-  { suit: "Hearts", value: "Four" },
-  { suit: "Hearts", value: "Five" },
-  { suit: "Hearts", value: "Six" },
-  { suit: "Hearts", value: "Seven" },
-  { suit: "Hearts", value: "Eight" },
-  { suit: "Hearts", value: "Nine" },
-  { suit: "Hearts", value: "Ten" },
-  { suit: "Hearts", value: "Jack" },
-  { suit: "Hearts", value: "Queen" },
-  { suit: "Hearts", value: "King" },
-];
-const spades = [
-  { suit: "Spades", value: "Ace" },
-  { suit: "Spades", value: "Two" },
-  { suit: "Spades", value: "Three" },
-  { suit: "Spades", value: "Four" },
-  { suit: "Spades", value: "Five" },
-  { suit: "Spades", value: "Six" },
-  { suit: "Spades", value: "Seven" },
-  { suit: "Spades", value: "Eight" },
-  { suit: "Spades", value: "Nine" },
-  { suit: "Spades", value: "Ten" },
-  { suit: "Spades", value: "Jack" },
-  { suit: "Spades", value: "Queen" },
-  { suit: "Spades", value: "King" },
-];
-
-const mockHand = [
-  { suit: "Diamonds", value: "King" },
-  { suit: "Clubs", value: "King" },
-  { suit: "Hearts", value: "King" },
-  { suit: "Spades", value: "King" },
-  { suit: "Diamonds", value: "Three" },
-];
+import { clubs, diamonds, hearts, spades } from "./deck.js";
 
 const dealCardsButton = document.querySelector("button");
 dealCardsButton.addEventListener("click", setupGame);
 
 function setupGame() {
-  const hand = deal();
-  const pairs = findPairs(hand);
+  const handMaxSize = 5;
+  const twoPair = 2;
+
+  const { hand, pairs } = deal(handMaxSize, twoPair);
 
   const oldContainer = document.querySelector("#container");
   const handContainer = createHandContainer(hand);
-  const result = createResult(pairs);
+  const result = createResult(pairs, twoPair);
   const newContainer = createContainer([
     pairs.length < 2 ? dealCardsButton : "",
     handContainer,
@@ -85,51 +20,38 @@ function setupGame() {
   oldContainer.replaceWith(newContainer);
 }
 
-function deal() {
+function deal(handMaxSize, twoPair) {
   const deck = clubs.concat(diamonds, hearts, spades);
   const hand = [];
+  const pairs = [];
 
-  while (hand.length < 5) {
+  while (hand.length < handMaxSize) {
     const index = parseInt(Math.random() * deck.length);
     const randomCard = deck[index];
+
     if (!hand.includes(randomCard)) {
+      const pair = findPair(pairs, hand, randomCard);
+
+      if (pair && pairs.length < twoPair) {
+        pairs.push(pair);
+      }
       hand.push(randomCard);
     }
   }
-  return hand;
+  return { hand, pairs };
 }
 
-function findPairs(hand) {
-  const pairs = [];
+function findPair(pairs, hand, newCard) {
+  const isEmpty = pairs.length < 1;
 
-  hand.forEach((currentCard) => {
-    hand.forEach((card) => {
-      if (isPair(pairs, currentCard, card)) {
-        pairs.push([currentCard, card]);
-      }
-    });
-  });
-  return pairs;
-}
+  for (const card of hand) {
+    const isTaken = !isEmpty && pairs[0].includes(card);
+    const isSameValue = card.value === newCard.value;
 
-function isPair(pairs, firstCard, secondCard) {
-  const isTaken =
-    isDuplicate(pairs, firstCard) || isDuplicate(pairs, secondCard);
-  const isSameSuit = firstCard.suit === secondCard.suit;
-  const isSameValue = firstCard.value === secondCard.value;
-
-  return !isTaken && !isSameSuit && isSameValue;
-}
-
-function isDuplicate(pairs, currentCard) {
-  for (const pair of pairs) {
-    for (const card of pair) {
-      if (currentCard.suit === card.suit && currentCard.value === card.value) {
-        return true;
-      }
+    if ((isEmpty && isSameValue) || (!isTaken && isSameValue)) {
+      return [card, newCard];
     }
   }
-  return false;
 }
 
 function createContainer(content) {
@@ -153,7 +75,7 @@ function createHandContainer(cards) {
   return handContainer;
 }
 
-function createResult(pairs) {
+function createResult(pairs, twoPair) {
   const resultContainer = document.createElement("div");
   resultContainer.setAttribute("id", "result-container");
 
@@ -165,11 +87,11 @@ function createResult(pairs) {
   result.append(resultText);
   resultContainer.append(result);
 
-  if (pairs.length < 2) {
+  if (pairs.length < twoPair) {
     resultText.innerText = "You lose!";
   }
-  if (pairs.length >= 2) {
-    resultText.innerText = "You got two pairs of cards!";
+  if (pairs.length >= twoPair) {
+    resultText.innerText = "You got a two pair!";
 
     const listOfPairs = createListOfPairs(pairs);
     result.append(listOfPairs);

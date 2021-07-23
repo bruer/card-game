@@ -28,19 +28,14 @@ button:hover {
   cursor: pointer;
 }
 
-#hand-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 #hand-container,
 #result-container {
   margin: 1rem 0;
   padding: 1rem;
   border: solid 3px;
   border-radius: 1rem;
-  width: 300px;
+  width: 20rem;
+  text-align: center;
 }
 
 #hand-container strong {
@@ -53,7 +48,6 @@ button:hover {
   padding: 0;
   margin: 0;
   font-size: 2rem;
-  text-align: center;
 }
 
 #hand-container li {
@@ -62,10 +56,11 @@ button:hover {
 
 #result p {
   margin: 0;
-  font-size: 1.5rem;
-  text-align: center;
+  font-size: 2rem;
 }
 
 #result ol {
+  font-size: 14px;
   padding-left: 2rem;
+  text-align: left;
 }
