@@ -6,7 +6,6 @@ dealCardsButton.addEventListener("click", setupGame);
 function setupGame() {
   const handMaxSize = 5;
   const twoPair = 2;
-
   const { hand, pairs } = deal(handMaxSize, twoPair);
 
   const oldContainer = document.querySelector("#container");
